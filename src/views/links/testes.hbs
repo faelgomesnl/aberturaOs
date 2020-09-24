@@ -1,0 +1,69 @@
+ 
+  <link rel="stylesheet" href="/css/styles.css">
+
+<div class="container p-4">
+    <div class="row">
+        <div class="col-md-4 mx-auto">
+
+            <div class="card">
+                <div class="card-body">
+                    <form action="/links/teste" method="POST">                    
+                        
+
+                        <div class="form-group">
+                            <textarea type="text" name="texto" class="form-control" placeholder="Descrição"></textarea>
+                        </div>                      
+
+                        <div class="form-group">
+                            <select class="select-css" name="contrato" id="list" onChange="update()">
+                                <option selected disabled>Escolha Um Contrato </option>
+                                {{#each lista}}                                    
+                                    <option value="{{NUM_CONTRATO}}" id="{{CODPARC}}">{{NUM_CONTRATO}} - {{NOMEPARC}}</option>                                   
+                                {{/each}}
+                            </select>
+                        </div>  
+
+                        <input type="hidden" id="value">
+		                <input type="hidden" id="codparc" name="codparc">
+
+                            {{!--  <div class="form-group">
+                                    <div class="dropdown">
+                    
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Escolha Um Contrato 
+                                    </button>
+
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        {{#each lista}}
+                                            <button class="dropdown-item" type="button">{{NUM_CONTRATO}}-{{NOMEPARC}}</button>
+                                        {{/each}}
+            
+                                    </div>  
+                                </div> --}}
+                                              
+                        <div class="form-group">
+                            <button class="btn btn-success btn-block">
+                                Registrar Ordem De Serviço
+                            </button>
+                        </div>
+                    </form>                   
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{{!-- RECEBE O VALOR INFORMADO NO SELECT A TRIBUI A INPUT PARA REGISTRAR O CODPARC --}}
+<script type="text/javascript">
+			function update() {
+				var select = document.getElementById('list');
+				var option = select.options[select.selectedIndex];
+
+				document.getElementById('value').value = option.value;
+				document.getElementById('codparc').value = option.id;
+			}
+
+			update();
+		</script>
