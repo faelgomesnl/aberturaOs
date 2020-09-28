@@ -17,9 +17,9 @@ passport.use('local.signin', new LocalStrategy({
      // const validPassword = await bcrypt.compare(senha, user.SENHA)
      // console.log(validPassword)
       if (senha == user.SENHA) {
-        done(null, user, req.flash('success','Welcome ' + user.NOMEUSU));
+        done(null, user, req.flash('success','Ben Vindo ' + user.NOMEUSU));
       } else {
-        done(null, false, req.flash('message', 'Incorrect Password'));
+        done(null, false, req.flash('message', 'Senha Incorreta'));
       } 
   } else {
     return done(null, false, req.flash('message', 'Usuário Não Existe!'));
