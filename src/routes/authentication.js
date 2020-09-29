@@ -27,15 +27,6 @@ router.post('/signin', (req, res, next) => {
     failureFlash: true
   })(req, res, next);
 });
-  /* req.check('NOMEUSU', 'Username is Required').notEmpty();
-  req.check('INTERNO', 'Password is Required').notEmpty();
-  const errors = req.validationErrors();
-  if (errors.length > 0) {
-    req.flash('message', errors[0].msg);
-    res.redirect('/signin');
-  }
-  
-}); */
 
 router.get('/logout', (req, res) => {
   req.logOut();

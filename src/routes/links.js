@@ -20,7 +20,6 @@ router.get('/teste', isLoggedIn, async (req, res) => {
 
 });
 
-
 //ADD OS
 router.post('/teste', isLoggedIn,  async (req, res) => {    
 
@@ -126,6 +125,5 @@ router.post('/edit/:id', async (req, res) => {
     /* req.flash('success', 'Link Updated Successfully'); */
     res.redirect('/links');
 });
-
 
 module.exports = router; 

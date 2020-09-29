@@ -8,7 +8,6 @@ helpers.encryptPassword = async (senha) => {
   return hash;
 };
 
-
 //comparação senhas
 helpers.matchPassword = async (senha, savedPassword) => {
   try {
