@@ -43,27 +43,13 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
     ('${numos}','${contrato}',GETDATE(),GETDATE(),'${parceiro}',1,12,110,'${texto}','P','',30101,1000000);
-    INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT) VALUES 
-    ('${numos}',1,4381,978,569,66,569,GETDATE(),GETDATE(),15)`);
-
-    /* await pool.query(`INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT) VALUES 
-    (285990,1,978,3242,569,66,569,GETDATE(),GETDATE(),97)`); */
-/* 
-    await pool.query(`INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT) VALUES 
-    (285988,1,978,3242,569,66,569,GETDATE(),GETDATE(),97)`); */
-    
-    //res.send('recebido')
+    INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
+    ('${numos}',1,4381,978,569,900,569,GETDATE(),GETDATE(),15,'N','N')`);   
     
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
     res.redirect('/links')
     
 });
-
-//LISTAR PARCEIRO
-/* router.get('/', isLoggedIn,  async (req, res) => {
-    const links = await pool.query('SELECT * FROM sankhya.AD_TBPARCEIRO');
-    res.render('links/list', { lista: links.recordset });
-}); */
 
 router.get('/', isLoggedIn,  async (req, res) => {
     const idlogin = req.user.CODLOGIN    
