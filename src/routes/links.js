@@ -8,16 +8,6 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add')
 });
 
-/* //ADD PARCEIRO
-router.post('/add', isLoggedIn,  async (req, res) => {    
-    const nome = req.body.nome;
-    const endereco = req.body.endereco;
-    await pool.query(`INSERT INTO sankhya.AD_TBPARCEIRO (NOME, ENDERECO) VALUES('${nome}','${endereco}')`);
-    req.flash('success', 'Parceiro Adicionado com Sucesso!!!!')
-    res.redirect('/links')
-    
-}); */
-
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
     const links = await pool.query(`SELECT distinct L.NUM_CONTRATO, PAR.NOMEPARC, PAR.CODPARC
