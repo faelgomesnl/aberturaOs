@@ -10,15 +10,32 @@ router.get('/add', isLoggedIn, (req, res) => {
 
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
-    const links = await pool.query(`SELECT distinct L.NUM_CONTRATO, PAR.NOMEPARC, PAR.CODPARC
+    const links = await pool.query(`SELECT distinct L.NUM_CONTRATO, PAR.NOMEPARC, PAR.CODPARC, PD.DESCRPROD, PS.CODPROD
     FROM sankhya.AD_TBACESSO L 
     INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO) 
     INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
-    WHERE L.ID_LOGIN = ${idlogin}`);     
-    
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE L.ID_LOGIN = ${idlogin}`); 
+
     res.render('links/testes',{lista: links.recordset})
 
 });
+
+/* router.get('/teste', isLoggedIn, async (req, res) => {
+    const idlogin = req.user.CODLOGIN  
+    const links2 = await pool.query(`SELECT distinct PS.CODPROD, PD.DESCRPROD
+    FROM sankhya.AD_TBACESSO L 
+    INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO) 
+    INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE L.ID_LOGIN = ${idlogin}`);
+
+    res.render('links/testes',{lista2: links2.recordset})
+
+}); */
+
 
 //ADD OS
 router.post('/teste', isLoggedIn,  async (req, res) => {    
@@ -29,11 +46,12 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     const texto = req.body.texto;
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
+    const produto = req.body.codprod;
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),GETDATE(),'${parceiro}',1,12,110,'${texto}','P','',30101,1000000);
+    ('${numos}','${contrato}',GETDATE(),'','${parceiro}',1,12,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,978,569,900,569,GETDATE(),GETDATE(),15,'N','N')`);   
+    ('${numos}',1,4381,'${produto}',569,900,569,GETDATE(),GETDATE(),15,'N','N')`);   
     
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
     res.redirect('/links')
@@ -122,7 +140,6 @@ router.post('/edit/:id', async (req, res) => {
     const nome = req.body.nome.substring(0,100);
     const endereco = req.body.endereco.substring(0,100);
     await pool.query(`UPDATE sankhya.AD_TBPARCEIRO set NOME=${nome} ENDERECO=${endereco} WHERE ID = ${id}`);
-    /* req.flash('success', 'Link Updated Successfully'); */
     res.redirect('/links');
 });
 

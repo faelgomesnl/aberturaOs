@@ -16,34 +16,25 @@
 
                         <div class="form-group">
                             <select class="select-css" name="contrato" id="list" onChange="update()">
+                                <option selected disabled>Contato/ Parceiro/ Produto </option>  
                                 <option selected disabled>Escolha Um Contrato </option>
+                                
                                 {{#each lista}}                                    
-                                    <option value="{{NUM_CONTRATO}}" id="{{CODPARC}}">{{NUM_CONTRATO}} - {{NOMEPARC}}</option>                                   
+                                    <option value="{{NUM_CONTRATO}}" id="{{CODPARC}}" title="{{CODPROD}}" isred="456">{{NUM_CONTRATO}} / {{NOMEPARC}} / {{ DESCRPROD }} / {{CODPROD}}</option>                                   
+                                    
                                 {{/each}}
                             </select>
-                        </div>  
+                        </div>
 
-                        <input type="hidden" id="value">
-		                <input type="hidden" id="codparc" name="codparc">
+                        <input  id="value">
+		                <input  id="codparc" name="codparc">
+                        <input  id="codprod" name="codprod">
+                        <input  id="dtprevisao" name="dtprevisao">
 
-                            {{!--  <div class="form-group">
-                                    <div class="dropdown">
-                    
-                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        Escolha Um Contrato 
-                                    </button>
-
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        {{#each lista}}
-                                            <button class="dropdown-item" type="button">{{NUM_CONTRATO}}-{{NOMEPARC}}</button>
-                                        {{/each}}
-            
-                                    </div>  
-                                </div> --}}
-                                              
+                        
                         <div class="form-group">
                             <button class="btn btn-success btn-block">
-                                Registrar Ordem De Serviço
+                                Gerar Ordem De Serviço
                             </button>
                         </div>
                     </form>                   
@@ -56,13 +47,17 @@
 </div>
 
 {{!-- RECEBE O VALOR INFORMADO NO SELECT A TRIBUI A INPUT PARA REGISTRAR O CODPARC --}}
-<script type="text/javascript">
-			function update() {
+<script type="text/javascript">   
+    
+    
+    function update() {
 				var select = document.getElementById('list');
 				var option = select.options[select.selectedIndex];
 
 				document.getElementById('value').value = option.value;
 				document.getElementById('codparc').value = option.id;
+                document.getElementById('codprod').value = option.title;
+                document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("isred"); 
 			}
 
 			update();
