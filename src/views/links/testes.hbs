@@ -16,11 +16,17 @@
 
                         <div class="form-group">
                             <select class="select-css" name="contrato" id="list" onChange="update()">
-                                <option selected disabled>Contato/ Parceiro/ Produto </option>  
+                                <option selected disabled>Contrato/ Parceiro/ Produto </option>  
                                 <option selected disabled>Escolha Um Contrato </option>
                                 
                                 {{#each lista}}                                    
-                                    <option value="{{NUM_CONTRATO}}" id="{{CODPARC}}" title="{{CODPROD}}" isred="456">{{NUM_CONTRATO}} / {{NOMEPARC}} / {{ DESCRPROD }} / {{CODPROD}}</option>                                   
+                                    <option value="{{NUM_CONTRATO}}" 
+                                            id="{{CODPARC}}" 
+                                            title="{{CODPROD}}" 
+                                            previsao="{{PREVISAO}}"
+                                            osweb="{{CODUSUOS}}">
+                                                {{NUM_CONTRATO}} / {{NOMEPARC}} / {{ DESCRPROD }}
+                                    </option>                                   
                                     
                                 {{/each}}
                             </select>
@@ -30,6 +36,8 @@
 		                <input  id="codparc" name="codparc">
                         <input  id="codprod" name="codprod">
                         <input  id="dtprevisao" name="dtprevisao">
+                        <input  id="codosweb" name="codosweb">
+                       
 
                         
                         <div class="form-group">
@@ -57,7 +65,8 @@
 				document.getElementById('value').value = option.value;
 				document.getElementById('codparc').value = option.id;
                 document.getElementById('codprod').value = option.title;
-                document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("isred"); 
+                document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("previsao"); 
+                document.getElementById('codosweb').value = event.target.selectedOptions[0].getAttribute("osweb"); 
 			}
 
 			update();
