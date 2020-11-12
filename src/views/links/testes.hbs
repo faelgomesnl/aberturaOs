@@ -35,8 +35,8 @@
                         <input  id="value">
 		                <input  id="codparc" name="codparc">
                         <input  id="codprod" name="codprod">
-                        <input  id="dtprevisao" name="dtprevisao">
-                        <input  id="codosweb" name="codosweb">
+                        {{!-- <input  id="dtprevisao" name="dtprevisao"> --}}
+                        {{!-- <input  id="codosweb" name="codosweb"> --}}
                        
 
                         
@@ -65,8 +65,8 @@
 				document.getElementById('value').value = option.value;
 				document.getElementById('codparc').value = option.id;
                 document.getElementById('codprod').value = option.title;
-                document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("previsao"); 
-                document.getElementById('codosweb').value = event.target.selectedOptions[0].getAttribute("osweb"); 
+                //document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("previsao"); 
+                //document.getElementById('codosweb').value = event.target.selectedOptions[0].getAttribute("osweb"); 
 			}
 
 			update();

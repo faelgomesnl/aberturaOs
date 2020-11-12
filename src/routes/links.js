@@ -8,37 +8,29 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add')
 });
 
+router.get('/newuser', isLoggedIn, (req, res) => {    
+    res.render('links/newuser')
+});
+
+router.post('/newuser', isLoggedIn, (req, res) => {   
+    //await pool.query(`INSERT INTO sankhya.AD_TBLOGIN (NOMEUSU, SENHA, fullname) VALUES('${nomeusu}','${senha}','${fullname}')`);
+    //const {nomeusu, senha, fullname} = req.body;
+
+    const nomeusu = req.body.nomeusu;
+    const senha = req.body.senha; 
+    const fullname = req.body.fullname;
+
+    pool.query(`INSERT INTO sankhya.AD_TBLOGIN (NOMEUSU, SENHA, fullname) VALUES('${nomeusu}','${senha}','${fullname}')`);
+    
+    //falta definir em qual página será direcionado no perfil do admin
+    res.send('received')
+});
+
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
     const links = await pool.query(`SELECT distinct L.NUM_CONTRATO, PAR.NOMEPARC, 
-    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, sla.NUSLA, CON.CODUSUOS, 
-    CONVERT(VARCHAR(19), GETDATE(), 120) as DATA, 
-    CASE sla.NUSLA 
-    WHEN 3 THEN DATEADD (HH, 4, CONVERT(VARCHAR(19), GETDATE(), 120))    
-    WHEN 4 THEN DATEADD (HH, 6, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 5 THEN DATEADD (HH, 8, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 6 THEN DATEADD (HH, 18, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 7 THEN DATEADD (HH, 12, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 8 THEN DATEADD (HH, 12, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 10 THEN DATEADD (HH, 20, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 11 THEN DATEADD (HH, 16, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 13 THEN DATEADD (HH,24, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 15 THEN DATEADD (HH, 24, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 16 THEN DATEADD (HH, 72, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 17 THEN DATEADD (HH, 2, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 18 THEN DATEADD (HH, 0, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 19 THEN DATEADD (HH,48, CONVERT(VARCHAR(19), GETDATE(), 120)) 
-    WHEN 21 THEN DATEADD (HH, 2, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 23 THEN DATEADD (HH,16, CONVERT(VARCHAR(19), GETDATE(), 120)) 
-    WHEN 23 THEN DATEADD (HH, 12, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 24 THEN DATEADD (HH, 12, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 25 THEN DATEADD (HH, 4, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 26 THEN DATEADD (HH, 18, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 27 THEN DATEADD (HH, 12, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 28 THEN DATEADD (HH, 18, CONVERT(VARCHAR(19), GETDATE(), 120))
-    WHEN 29 THEN DATEADD (HH, 8, CONVERT(VARCHAR(19), GETDATE(), 120))           
-    WHEN 30 THEN DATEADD (HH, 24, CONVERT(VARCHAR(19), GETDATE(), 120))    
-  END PREVISAO
+    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, sla.NUSLA, CON.CODUSUOS
+    
 
     FROM sankhya.AD_TBACESSO L 
     INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO) 
@@ -69,7 +61,6 @@ router.get('/teste', isLoggedIn, async (req, res) => {
 
 }); */
 
-
 //ADD OS
 router.post('/teste', isLoggedIn,  async (req, res) => {    
 
@@ -80,13 +71,13 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
-    const dtprevisao = req.body.dtprevisao;
-    const codosweb = req.body.codosweb; 
+    //const dtprevisao = req.body.dtprevisao;
+    //const codosweb = req.body.codosweb; 
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),'2020-10-07 14:27:18.077','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
+    ('${numos}','${contrato}',GETDATE(),'2020-14-10 20:53','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,'${produto}','${codosweb}',900,569,GETDATE(),'2020-08-10 14:27:18.077',15,'N','N')`);   
+    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2020-14-10 20:53',15,'N','N')`);   
     
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
     res.redirect('/links')
@@ -102,13 +93,30 @@ router.get('/', isLoggedIn,  async (req, res) => {
     I.NUMITEM,
     USU.NOMEUSU AS EXECUTANTE,
     CONVERT(VARCHAR(30),O.DHCHAMADA,120) AS ABERTURA,
-    CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO
+    CONVERT(VARCHAR(30),O.DTPREVISTA,120) AS PREVISAO,
+    CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
+
+    CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
+    CID.NOMECID AS CIDADE,
+    UFS.UF,
+    SLA.DESCRICAO AS DESCRICAO_SLA,
+    O.AD_MOTIVO_OI AS MOTIVO,
+    O.AD_SOLICITANTE_OI AS SOLICITANTE,
+    AD_TIPO_OI AS TIPO
+
     FROM sankhya.TCSOSE O
     INNER JOIN sankhya.TCSCON C ON (C.NUMCONTRATO=O.NUMCONTRATO)
     INNER JOIN sankhya.AD_TBACESSO AC ON (C.NUMCONTRATO=AC.NUM_CONTRATO)
     INNER JOIN sankhya.TGFPAR P ON (P.CODPARC=C.CODPARC)
     INNER JOIN sankhya.TCSITE I ON (O.NUMOS=I.NUMOS)
     INNER JOIN SANKHYA.TSIUSU USU ON (USU.CODUSU = I.CODUSU)
+
+    LEFT JOIN SANKHYA.TCSITS ITS ON (ITS.CODSIT = I.CODSIT)
+    LEFT JOIN SANKHYA.TGFCPL CPL ON (P.CODPARC = CPL.CODPARC)
+    LEFT JOIN SANKHYA.TSICID CID ON (CPL.CODCIDENTREGA = CID.CODCID)
+    LEFT JOIN SANKHYA.TSIUFS UFS ON (CID.UF = UFS.CODUF)
+    LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = C.NUSLA)
+
     WHERE 
     O.NUFAP IS NULL
     AND I.TERMEXEC IS NULL
@@ -132,7 +140,14 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
     U.NOMEUSU AS RESPONSAVEL,
     USU.NOMEUSU AS EXECUTANTE,
-    TSIUSU.NOMEUSU AS FECHADA
+    TSIUSU.NOMEUSU AS FECHADA,
+
+    CID.NOMECID AS CIDADE,
+    UFS.UF,
+    SLA.DESCRICAO AS DESCRICAO_SLA,
+    O.AD_MOTIVO_OI AS MOTIVO,
+    O.AD_SOLICITANTE_OI AS SOLICITANTE,
+    AD_TIPO_OI AS TIPO
 
     FROM sankhya.TCSOSE O
     INNER JOIN sankhya.TCSCON C ON (C.NUMCONTRATO=O.NUMCONTRATO)
@@ -143,6 +158,12 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     INNER JOIN sankhya.TSIUSU USU ON (USU.CODUSU = I.CODUSU)
     INNER JOIN sankhya.TSIUSU U ON (O.CODUSURESP=U.CODUSU)
 
+    LEFT JOIN SANKHYA.TCSITS ITS ON (ITS.CODSIT = I.CODSIT)
+    LEFT JOIN SANKHYA.TGFCPL CPL ON (P.CODPARC = CPL.CODPARC)
+    LEFT JOIN SANKHYA.TSICID CID ON (CPL.CODCIDENTREGA = CID.CODCID)
+    LEFT JOIN SANKHYA.TSIUFS UFS ON (CID.UF = UFS.CODUF)
+    LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = C.NUSLA)
+
     WHERE 
     O.NUFAP IS NULL
     AND O.SITUACAO = 'F'
@@ -150,6 +171,53 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     AND O.DHCHAMADA >= '10/09/2020'
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/osclose', { lista: links.recordset });
+});
+
+//listar todas as OS registradas para o parceiro
+router.get('/all', isLoggedIn,  async (req, res) => {
+    const idlogin = req.user.CODLOGIN    
+    const links = await pool.query(`SELECT 
+    C.NUMCONTRATO, 
+    P.NOMEPARC,    
+    O.NUMOS,
+    (CASE O.SITUACAO WHEN 'F' THEN 'Fechada'ELSE 'Aberta' END) AS SITUACAO, 
+    I.NUMITEM,
+    CONVERT(VARCHAR(30),O.DHCHAMADA,113) AS ABERTURA,
+    CONVERT(VARCHAR(30),O.DTFECHAMENTO,113) AS DT_FECHAMENTO,
+    CONVERT(VARCHAR(30),I.TERMEXEC,113) AS DT_EXECUCAO,
+    CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
+    CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
+    U.NOMEUSU AS RESPONSAVEL,
+    USU.NOMEUSU AS EXECUTANTE,
+    TSIUSU.NOMEUSU AS FECHADA,
+
+    CID.NOMECID AS CIDADE,
+    UFS.UF,
+    SLA.DESCRICAO AS DESCRICAO_SLA,
+    O.AD_MOTIVO_OI AS MOTIVO,
+    O.AD_SOLICITANTE_OI AS SOLICITANTE,
+    AD_TIPO_OI AS TIPO
+
+    FROM sankhya.TCSOSE O
+    INNER JOIN sankhya.TCSCON C ON (C.NUMCONTRATO=O.NUMCONTRATO)
+    INNER JOIN sankhya.AD_TBACESSO AC ON (C.NUMCONTRATO=AC.NUM_CONTRATO)
+    INNER JOIN sankhya.TGFPAR P ON (P.CODPARC=C.CODPARC)
+    INNER JOIN sankhya.TCSITE I ON (O.NUMOS=I.NUMOS)
+    INNER JOIN sankhya.TSIUSU     ON (TSIUSU.CODUSU = O.CODUSUFECH)
+    INNER JOIN sankhya.TSIUSU USU ON (USU.CODUSU = I.CODUSU)
+    INNER JOIN sankhya.TSIUSU U ON (O.CODUSURESP=U.CODUSU)
+
+    LEFT JOIN SANKHYA.TCSITS ITS ON (ITS.CODSIT = I.CODSIT)
+    LEFT JOIN SANKHYA.TGFCPL CPL ON (P.CODPARC = CPL.CODPARC)
+    LEFT JOIN SANKHYA.TSICID CID ON (CPL.CODCIDENTREGA = CID.CODCID)
+    LEFT JOIN SANKHYA.TSIUFS UFS ON (CID.UF = UFS.CODUF)
+    LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = C.NUSLA)
+
+    WHERE 
+    O.NUFAP IS NULL   
+    AND O.DHCHAMADA >= '10/09/2020'
+    AND AC.ID_LOGIN= ${idlogin}`);
+    res.render('links/all', { lista: links.recordset });
 });
 
 //remover parceiro

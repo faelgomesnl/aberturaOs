@@ -18,6 +18,7 @@
           <div class="dropdown-menu" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" href="/links">OS Abertas</a>
             <a class="dropdown-item" href="/links/osclose">OS Fechadas</a>
+            <a class="dropdown-item" href="/links/all">Lista Geral</a>
             <div class="dropdown-divider"></div>
             <a class="dropdown-item" href="/links/teste">Abertura De OS</a>
           </div>
@@ -37,13 +38,16 @@
         <li class="nav-item">
           <a class="nav-link" href="/logout">Logout</a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/links/newuser">Cadastrar Usuários</a>
+        </li>
         {{else}}
         <li class="nav-item">
           <a class="nav-link" href="/signin">Login</a>
         </li>
-        <li class="nav-item">
+       {{!--  <li class="nav-item">
           <a class="nav-link" href="/signup">Cadastre-se</a>
-        </li>
+        </li> --}}
         {{/if}}
       </ul>
     </div>
