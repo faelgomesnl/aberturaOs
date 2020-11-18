@@ -8,14 +8,12 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add')
 });
 
+//ADICIONAR NOVO USUARIO, SOMENTE ADMIN
 router.get('/newuser', isLoggedIn, (req, res) => {    
     res.render('links/newuser')
 });
 
-router.post('/newuser', isLoggedIn, (req, res) => {   
-    //await pool.query(`INSERT INTO sankhya.AD_TBLOGIN (NOMEUSU, SENHA, fullname) VALUES('${nomeusu}','${senha}','${fullname}')`);
-    //const {nomeusu, senha, fullname} = req.body;
-
+router.post('/newuser', isLoggedIn, (req, res) => {    
     const nomeusu = req.body.nomeusu;
     const senha = req.body.senha; 
     const fullname = req.body.fullname;
@@ -26,12 +24,26 @@ router.post('/newuser', isLoggedIn, (req, res) => {
     res.send('received')
 });
 
+//ADICIONAR CONTRATOS AOS NOVOS USUÁRIOS, SOMENTE ADMIN
+router.get('/newcont', isLoggedIn, (req, res) => {    
+    res.render('links/newcont')
+});
+
+router.post('/newcont', isLoggedIn, (req, res) => {  
+    const contrato = req.body.contrato;
+    const login = req.body.login; 
+
+    pool.query(`INSERT INTO sankhya.AD_TBACESSO (NUM_CONTRATO, ID_LOGIN) VALUES('${contrato}','${login}')`);
+    
+    //falta definir em qual página será direcionado no perfil do admin (listagem de todos os logins cadastrados)
+    res.send('received')
+});
+
+//ADD OS
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
     const links = await pool.query(`SELECT distinct L.NUM_CONTRATO, PAR.NOMEPARC, 
-    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, sla.NUSLA, CON.CODUSUOS
-    
-
+    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, sla.NUSLA, CON.CODUSUOS 
     FROM sankhya.AD_TBACESSO L 
     INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO) 
     INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
@@ -41,27 +53,12 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     WHERE L.ID_LOGIN = ${idlogin}
     AND PD.USOPROD='S' 
     AND PS.SITPROD IN ('A','B')
-    AND CON.ATIVO = 'S'`); 
+    OR CON.ATIVO = 'S'`); 
 
     res.render('links/testes',{lista: links.recordset})
 
 });
 
-/* router.get('/teste', isLoggedIn, async (req, res) => {
-    const idlogin = req.user.CODLOGIN  
-    const links2 = await pool.query(`SELECT distinct PS.CODPROD, PD.DESCRPROD
-    FROM sankhya.AD_TBACESSO L 
-    INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO) 
-    INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
-    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
-    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
-    WHERE L.ID_LOGIN = ${idlogin}`);
-
-    res.render('links/testes',{lista2: links2.recordset})
-
-}); */
-
-//ADD OS
 router.post('/teste', isLoggedIn,  async (req, res) => {    
 
     const links = await pool.query('select top (1) NUMOS +1 as NUMOS from sankhya.TCSOSE order by numos desc');  
@@ -84,6 +81,8 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     
 });
 
+//PAGINAS DATATABLES
+//LISTAR TODAS AS OS ABERTAS
 router.get('/', isLoggedIn,  async (req, res) => {
     const idlogin = req.user.CODLOGIN    
     const links = await pool.query(`SELECT 
@@ -126,6 +125,7 @@ router.get('/', isLoggedIn,  async (req, res) => {
     res.render('links/list', { lista: links.recordset });
 });
 
+//LISTAR TODAS AS OS FECHADAS
 router.get('/osclose', isLoggedIn,  async (req, res) => {
     const idlogin = req.user.CODLOGIN    
     const links = await pool.query(`SELECT 
@@ -218,6 +218,14 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     AND O.DHCHAMADA >= '10/09/2020'
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/all', { lista: links.recordset });
+});
+
+//listar todos os usuários (login) cadastrados
+router.get('/allogin', isLoggedIn,  async (req, res) => {
+    const idlogin = req.user.CODLOGIN    
+    const links = await pool.query(`SELECT CODLOGIN,fullname,NOMEUSU,ADMINISTRADOR
+    FROM sankhya.AD_TBLOGIN`);
+    res.render('links/allogin', { lista: links.recordset });
 });
 
 //remover parceiro

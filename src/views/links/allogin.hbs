@@ -23,68 +23,22 @@
                 <table id="table" class="table table-striped table-bordered" style="width:100%">
                 <thead>
                     <tr>
-                        <th data-field="contrato" data-editable="true">Contrato</th>
-                        <th data-field="parceiro">Parceiro</th>                        
-                        <th data-field="os" data-editable="true">OS</th>
-                        <th data-field="os" data-editable="true">Situação</th>
-                        <th data-field="item" data-editable="true">Item</th> 
-
-                        <th data-field="defeito" data-editable="true">SLA</th> 
-
-                        <th data-field="abertura">Abertura</th>
-                        <th data-field="fechamento">Fechamento</th>
-                        <th data-field="execucao">Execução</th>                        
-                        <th data-field="defeitos" data-editable="true">Defeitos</th>
-                        <th data-field="solucao" data-editable="true">Solução</th> 
-                        <th data-field="responsavel" data-editable="true">Responsável</th> 
-                        <th data-field="executante" data-editable="true">Executante</th> 
-                        <th data-field="fechada" data-editable="true">Fechada</th>  
-
-                        <th data-field="defeito" data-editable="true">Cidade</th>  
-                        <th data-field="defeito" data-editable="true">UF</th>                      
-                        <th data-field="defeito" data-editable="true">Motivo</th>  
-                        <th data-field="defeito" data-editable="true">Solicitante</th>  
-                        <th data-field="defeito" data-editable="true">Tipo</th>                      
+                        <th data-field="contrato" data-editable="true">Cód. Usuário</th>
+                        <th data-field="contrato" data-editable="true">Usuário</th>
+                        <th data-field="contrato" data-editable="true">Login</th>  
+                                                                   
                     </tr>
                 </thead>
                 <tbody>
                  {{#each lista}}
                     <tr>
-                      <td>{{NUMCONTRATO}}</td>                      
-                      <td>{{NOMEPARC}}</td>                      
-                      <td>{{NUMOS}}</td> 
-                      <td>{{SITUACAO}}</td> 
-                      <td>{{NUMITEM}}</td> 
-                      <td>{{DESCRICAO_SLA}}</td> 
-                      <td>{{ABERTURA}}</td>
-                      <td>{{DT_FECHAMENTO}}</td>
-                      <td>{{DT_EXECUCAO}}</td>
-                      <td>{{DEFEITO}}</td>
-                      <td>{{SOLUCAO}}</td>
-                      <td>{{RESPONSAVEL}}</td>
-                      <td>{{EXECUTANTE}}</td>
-                      <td>{{FECHADA}}</td>
-                       
-                      <td>{{CIDADE}}</td> 
-                      <td>{{UF}}</td> 
-                     
-                      <td>{{MOTIVO}}</td> 
-                      <td>{{SOLICITANTE}}</td> 
-                      <td>{{TIPO}}</td>
+                      <td>{{CODLOGIN}}</td>                      
+                      <td>{{fullname}}</td> 
+                       <td>{{NOMEUSU}}</td> 
                        
                     </tr>
                 {{/each}}
                 </tbody>
-                <tfoot>
-            <tr>
-                <th>Name</th>
-                <th>Position</th>
-                <th>Office</th>
-                <th>Age</th>
-                <th>Start date</th>
-                <th>Salary</th>
-            </tr>
-        </tfoot>
             </table>
 
           </div>
