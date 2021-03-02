@@ -32,9 +32,27 @@
                             </select>
                         </div>
 
-                        <input  id="value">
-		                <input  id="codparc" name="codparc">
-                        <input  id="codprod" name="codprod">
+                        <div class="form-group">
+                            <select class="select-css" name="contrato" id="list" onChange="update()">
+                                <option selected disabled>Contrato/ Parceiro/ Produto </option>  
+                                <option selected disabled>Contato </option>
+                                
+                                {{#each lista}}                                    
+                                    <option value="{{NUM_CONTRATO}}" 
+                                            id="{{CODPARC}}" 
+                                            title="{{CODPROD}}" 
+                                            previsao="{{PREVISAO}}"
+                                            osweb="{{CODUSUOS}}">
+                                                {{NUM_CONTRATO}} / {{NOMEPARC}} / {{ DESCRPROD }}
+                                    </option>                                   
+                                    
+                                {{/each}}
+                            </select>
+                        </div>
+
+                        <input hidden id="value">
+		                <input hidden id="codparc" name="codparc">
+                        <input hidden id="codprod" name="codprod">
                         {{!-- <input  id="dtprevisao" name="dtprevisao"> --}}
                         {{!-- <input  id="codosweb" name="codosweb"> --}}
                        

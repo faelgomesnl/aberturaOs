@@ -1,0 +1,208 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js"></script>
+
+<table border="0" cellspacing="5" cellpadding="5">
+    <tbody>
+        <tr>
+            <td>Data Inicial:</td>
+            <td><input name="min" id="min" type="text" autocomplete="off"></td>
+        </tr>
+        <tr>
+            <td>Data Final:</td>
+            <td><input name="max" id="max" type="text" autocomplete="off"></td>
+        </tr>
+    </tbody>
+</table>
+<table width="100%" class="display" id="example" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Profissão</th>
+            <th>Localidade</th>
+            <th>Idade</th>
+            <th>Data de Inicio</th>
+            <th>Salario</th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th>Nome</th>
+            <th>Profissão</th>
+            <th>Localidade</th>
+            <th>Idade</th>
+            <th>Data de Inicio</th>
+            <th>Salario</th>
+        </tr>
+    </tfoot>
+    <tbody>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2011</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2012</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2013</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2014</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2015</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2016</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2017</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2018</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/04/2019</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/06/2019</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/07/2019</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/08/2019</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/10/2019</td>
+            <td>R$3208</td>
+        </tr>
+        <tr>
+            <td>Teste</td>
+            <td>Arquiteto</td>
+            <td>São Paulo</td>
+            <td>61</td>
+            <td>25/11/2019</td>
+            <td>R$3208</td>
+        </tr>
+    </tbody>
+</table>
+
+<script>
+    function parseDateValue(rawDate) {
+    var dateArray = rawDate.split("/");
+    var parsedDate = dateArray[2] + dateArray[1] + dateArray[0];
+    return parsedDate;
+}
+
+$(document).ready(function() {
+    $.fn.dataTable.ext.search.push(
+        function(settings, data, dataIndex) {
+            var dateStart = parseDateValue($("#min").val());
+            var dateEnd = parseDateValue($("#max").val());
+            var evalDate = parseDateValue(data[4]);
+
+            if ((isNaN(dateStart)) || (isNaN(dateEnd))) {
+                return true;
+            }
+            if (evalDate >= dateStart && evalDate <= dateEnd) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    );
+
+
+    $("#min").datepicker({
+        dateFormat: 'dd/mm/yy',
+        onSelect: function() {
+            table.draw();
+        },
+        changeMonth: true,
+        changeYear: true
+    });
+    $("#max").datepicker({
+        dateFormat: 'dd/mm/yy',
+        onSelect: function() {
+            table.draw();
+        },
+        changeMonth: true,
+        changeYear: true
+    });
+    var table = $('#example').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/Portuguese-Brasil.json"
+        }
+    } );
+
+    $('#min, #max').change(function() {
+        table.draw();
+    });
+});
+</script>

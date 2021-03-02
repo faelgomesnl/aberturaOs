@@ -16,7 +16,7 @@ passport.use('local.signin', new LocalStrategy({
       const user = rows.recordset[0];      
      
       if (senha == user.SENHA) {
-        done(null, user, req.flash('success','Ben Vindo ' + user.NOMEUSU));
+        done(null, user, req.flash('success','Bem Vindo ' + user.NOMEUSU));
       } else {
         done(null, false, req.flash('message', 'Senha Incorreta'));
       } 

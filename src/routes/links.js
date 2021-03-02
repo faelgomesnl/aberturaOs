@@ -20,40 +20,64 @@ router.post('/newuser', isLoggedIn, (req, res) => {
 
     pool.query(`INSERT INTO sankhya.AD_TBLOGIN (NOMEUSU, SENHA, fullname) VALUES('${nomeusu}','${senha}','${fullname}')`);
     
-    //falta definir em qual página será direcionado no perfil do admin
-    res.send('received')
+    res.redirect('/links/allogin')
 });
 
 //ADICIONAR CONTRATOS AOS NOVOS USUÁRIOS, SOMENTE ADMIN
-router.get('/newcont', isLoggedIn, (req, res) => {    
-    res.render('links/newcont')
+router.get('/newcont', isLoggedIn, async (req, res) => {  
+    
+    const links = await pool.query(`SELECT CODLOGIN,fullname,NOMEUSU,ADMINISTRADOR
+    FROM sankhya.AD_TBLOGIN 
+    ORDER BY NOMEUSU `); 
+    
+    /* const links2 = await pool.query(`SELECT CON.NUMCONTRATO, CON.CODPARC, PAR.NOMEPARC
+    FROM sankhya.TCSCON CON
+    INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE CON.ATIVO = 'S'
+    AND PS.SITPROD IN ('A','B')
+    AND PD.USOPROD='S'  `);  
+    res.render('links/newcont',{lista: links.recordset, lista2: links2.recordset })*/
+   
+    res.render('links/newcont',{lista: links.recordset})
 });
 
-router.post('/newcont', isLoggedIn, (req, res) => {  
+/* router.get('/newcont', isLoggedIn, async (req, res) => {  
+    
+    const links2 = await pool.query(`SELECT NUM_CONTRATO
+    FROM sankhya.AD_TBACESSO
+    WHERE ID_LOGIN = 8 `);     
+   
+    console.log('este é link 2',links2)
+    res.render('links/newcont',{lista2: links2.recordset})
+}); */
+
+router.post('/newcont', isLoggedIn, async (req, res) => {  
+
     const contrato = req.body.contrato;
     const login = req.body.login; 
 
     pool.query(`INSERT INTO sankhya.AD_TBACESSO (NUM_CONTRATO, ID_LOGIN) VALUES('${contrato}','${login}')`);
     
-    //falta definir em qual página será direcionado no perfil do admin (listagem de todos os logins cadastrados)
-    res.send('received')
+    req.flash('success', 'O Contrato foi Vincunlado com Sucesso!!!!')
+    res.redirect('/links/newcont')
 });
 
 //ADD OS
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
-    const links = await pool.query(`SELECT distinct L.NUM_CONTRATO, PAR.NOMEPARC, 
-    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, sla.NUSLA, CON.CODUSUOS 
-    FROM sankhya.AD_TBACESSO L 
-    INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO) 
+    const links = await pool.query(`SELECT DISTINCT L.NUM_CONTRATO, PAR.NOMEPARC, 
+    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, CON.CODUSUOS , L.ID_LOGIN
+    FROM sankhya.AD_TBACESSO L
+    INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
     INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
     INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
     INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
-    INNER JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = CON.NUSLA)
     WHERE L.ID_LOGIN = ${idlogin}
-    AND PD.USOPROD='S' 
+    AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
-    OR CON.ATIVO = 'S'`); 
+    AND PD.USOPROD='S'`); 
 
     res.render('links/testes',{lista: links.recordset})
 
@@ -72,9 +96,9 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     //const codosweb = req.body.codosweb; 
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),'2020-14-10 20:53','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
+    ('${numos}','${contrato}',GETDATE(),'2021-04-03 09:31','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2020-14-10 20:53',15,'N','N')`);   
+    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-03 09:31',15,'N','N')`);   
     
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
     res.redirect('/links')
@@ -91,8 +115,8 @@ router.get('/', isLoggedIn,  async (req, res) => {
     O.NUMOS, 
     I.NUMITEM,
     USU.NOMEUSU AS EXECUTANTE,
-    CONVERT(VARCHAR(30),O.DHCHAMADA,120) AS ABERTURA,
-    CONVERT(VARCHAR(30),O.DTPREVISTA,120) AS PREVISAO,
+    CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
+    CONVERT(VARCHAR(30),O.DTPREVISTA,103) AS PREVISAO,
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
 
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
@@ -133,9 +157,9 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     P.NOMEPARC,    
     O.NUMOS, 
     I.NUMITEM,
-    CONVERT(VARCHAR(30),O.DHCHAMADA,113) AS ABERTURA,
-    CONVERT(VARCHAR(30),O.DTFECHAMENTO,113) AS DT_FECHAMENTO,
-    CONVERT(VARCHAR(30),I.TERMEXEC,113) AS DT_EXECUCAO,
+    CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
+    CONVERT(VARCHAR(30),O.DTFECHAMENTO,103) AS DT_FECHAMENTO,
+    CONVERT(VARCHAR(30),I.TERMEXEC,103) AS DT_EXECUCAO,
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
     U.NOMEUSU AS RESPONSAVEL,
@@ -182,9 +206,9 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     O.NUMOS,
     (CASE O.SITUACAO WHEN 'F' THEN 'Fechada'ELSE 'Aberta' END) AS SITUACAO, 
     I.NUMITEM,
-    CONVERT(VARCHAR(30),O.DHCHAMADA,113) AS ABERTURA,
-    CONVERT(VARCHAR(30),O.DTFECHAMENTO,113) AS DT_FECHAMENTO,
-    CONVERT(VARCHAR(30),I.TERMEXEC,113) AS DT_EXECUCAO,
+    CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
+    CONVERT(VARCHAR(30),O.DTFECHAMENTO,103) AS DT_FECHAMENTO,
+    CONVERT(VARCHAR(30),I.TERMEXEC,103) AS DT_EXECUCAO,
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
     U.NOMEUSU AS RESPONSAVEL,
@@ -216,6 +240,7 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     WHERE 
     O.NUFAP IS NULL   
     AND O.DHCHAMADA >= '10/09/2020'
+    AND I.TERMEXEC = (SELECT DISTINCT MAX (TERMEXEC) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS)
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/all', { lista: links.recordset });
 });
