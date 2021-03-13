@@ -67,21 +67,82 @@ router.post('/newcont', isLoggedIn, async (req, res) => {
 //ADD OS
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
-    const links = await pool.query(`SELECT DISTINCT L.NUM_CONTRATO, PAR.NOMEPARC, 
+    //contrato
+    const links = await pool.query(`SELECT DISTINCT L.NUM_CONTRATO, PAR.NOMEPARC,
     PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, CON.CODUSUOS , L.ID_LOGIN
     FROM sankhya.AD_TBACESSO L
     INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
     INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
     INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
     INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    INNER JOIN sankhya.TGFCTT C ON (PAR.CODPARC=C.CODPARC)
     WHERE L.ID_LOGIN = ${idlogin}
     AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
     AND PD.USOPROD='S'`); 
 
-    res.render('links/testes',{lista: links.recordset})
+    //contato
+    /* const links2 = await pool.query(`SELECT DISTINCT c.CODCONTATO,c.NOMECONTATO, p.CODPARC,
+    con.NUMCONTRATO, L.ID_LOGIN
+    from sankhya.TGFPAR P
+    INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
+    INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
+    inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+        INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE L.ID_LOGIN = ${idlogin}
+    AND CON.ATIVO = 'S'
+    AND PS.SITPROD IN ('A','B')
+    AND PD.USOPROD='S'
+    order by con.NUMCONTRATO, c.CODCONTATO`);  */
+    
+    
+    const links2 = await pool.query(`SELECT DISTINCT 
+    CONVERT(VARCHAR(30),c.CODCONTATO,103)+'-'+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+'-'
+    + UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as CONTATO
+    from sankhya.TGFPAR P
+    INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
+    INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
+    inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+        INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE L.ID_LOGIN = ${idlogin}
+    AND CON.ATIVO = 'S'
+    AND PS.SITPROD IN ('A','B')
+    AND PD.USOPROD='S'
+    --order by con.NUMCONTRATO, c.CODCONTATO`);
 
+    res.render('links/testes', {geral: links.recordset, cont: links2.recordset})
 });
+
+
+router.get('/teste2/:contrato',  async (req, res) => {
+    //const idlogin = req.user.CODLOGIN  
+    //contato
+    //const contrato = req.body.contrato;  
+    const contrato = parseInt(req.params.contrato)  
+    const links2 = await pool.query(`SELECT DISTINCT c.CODCONTATO,c.NOMECONTATO, p.CODPARC,
+    con.NUMCONTRATO, L.ID_LOGIN
+    from sankhya.TGFPAR P
+    INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
+    INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
+    inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+        INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE L.ID_LOGIN = 34
+    AND CON.ATIVO = 'S'
+    AND PS.SITPROD IN ('A','B')
+    AND PD.USOPROD='S'
+    AND con.NUMCONTRATO = ${contrato}
+    order by con.NUMCONTRATO, c.CODCONTATO`);
+    console.log('print contrato') 
+    console.log('print consulta',links2.recordset) 
+    /*  */
+    res.send(links2.recordset)    
+});
+
+
+
 
 router.post('/teste', isLoggedIn,  async (req, res) => {    
 
@@ -89,6 +150,7 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     const numos = Object.values(links.recordset[0])    
 
     const texto = req.body.texto;
+    const filetoupload= req.body.filetoupload
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
@@ -96,10 +158,13 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     //const codosweb = req.body.codosweb; 
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),'2021-04-03 09:31','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
+    ('${numos}','${contrato}',GETDATE(),'2021-04-008 15:40','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-03 09:31',15,'N','N')`);   
+    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');
+    INSERT INTO sankhya.TSIATA (CODATA,DESCRICAO,ARQUIVO,CONTEUDO,CODUSU,DTALTER,TIPO) VALUES ('${numos}','ANEXO','${filetoupload}','${filetoupload}',1006,GETDATE(),'W')
+`);   
     
+    console.log(filetoupload)
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
     res.redirect('/links')
     
@@ -125,7 +190,8 @@ router.get('/', isLoggedIn,  async (req, res) => {
     SLA.DESCRICAO AS DESCRICAO_SLA,
     O.AD_MOTIVO_OI AS MOTIVO,
     O.AD_SOLICITANTE_OI AS SOLICITANTE,
-    AD_TIPO_OI AS TIPO
+    AD_TIPO_OI AS TIPO,
+    ITS.DESCRICAO
 
     FROM sankhya.TCSOSE O
     INNER JOIN sankhya.TCSCON C ON (C.NUMCONTRATO=O.NUMCONTRATO)
@@ -206,6 +272,7 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     O.NUMOS,
     (CASE O.SITUACAO WHEN 'F' THEN 'Fechada'ELSE 'Aberta' END) AS SITUACAO, 
     I.NUMITEM,
+    Replace(convert(char(10),O.DHCHAMADA,103),'/','') AS ABERTURA2,
     CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
     CONVERT(VARCHAR(30),O.DTFECHAMENTO,103) AS DT_FECHAMENTO,
     CONVERT(VARCHAR(30),I.TERMEXEC,103) AS DT_EXECUCAO,
@@ -220,7 +287,8 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     SLA.DESCRICAO AS DESCRICAO_SLA,
     O.AD_MOTIVO_OI AS MOTIVO,
     O.AD_SOLICITANTE_OI AS SOLICITANTE,
-    AD_TIPO_OI AS TIPO
+    AD_TIPO_OI AS TIPO,
+    ITS.DESCRICAO
 
     FROM sankhya.TCSOSE O
     INNER JOIN sankhya.TCSCON C ON (C.NUMCONTRATO=O.NUMCONTRATO)
@@ -239,7 +307,7 @@ router.get('/all', isLoggedIn,  async (req, res) => {
 
     WHERE 
     O.NUFAP IS NULL   
-    AND O.DHCHAMADA >= '10/09/2020'
+    --AND O.DHCHAMADA >= '10/09/2020'
     AND I.TERMEXEC = (SELECT DISTINCT MAX (TERMEXEC) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS)
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/all', { lista: links.recordset });
