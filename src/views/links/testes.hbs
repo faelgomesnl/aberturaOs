@@ -32,15 +32,12 @@
                             </select>
                         </div>
 
-                       {{!--  <button class="btn btn-success btn-block" onclick="atualiza()">
-                                CARREGAR
-                            </button> --}}
-
                         <div class="form-group" hidden>
                             <select class="select-css" name="contato" id="list2" onChange="update()">    
                                 
                                 {{#each cont}}                                    
-                                    <option value="{{CONTATO}}" >
+                                    <option value="{{CONTATO}}"
+                                    id="{{CODCONT}}" >
                                                 {{CONTATO}}
                                     </option>                                   
                                     
@@ -49,7 +46,7 @@
                         </div> 
 
                         <div class="form-group">
-                            <select class="select-css" name="contato" id="aqui" onChange="update()"> 
+                            <select class="select-css" name="contato" id="aqui" onChange="update2()"> 
                                 <option value="" disabled selected>Escolha Contato Responsável</option>   
                                 
                             </select>
@@ -60,15 +57,11 @@
                             <input type="file" name="filetoupload"><br> 
                         </div>
 
-                        <input  id="value">
-		                <input  id="codparc" name="codparc">
-                        <input  id="codprod" name="codprod"> 
-                        <input  id="atualiza" name="atualiza"> 
-                        
-                           
-                        {{!-- <input  id="dtprevisao" name="dtprevisao"> --}}
-                        {{!-- <input  id="codosweb" name="codosweb"> --}}
-                       
+                        {{!-- armazena valores envio req.body insert  --}}
+                        <input hidden id="value">
+		                <input hidden id="codparc" name="codparc">
+                        <input hidden id="codprod" name="codprod"> 
+                        <input hidden id="atualiza" name="atualiza">                      
 
                         
                         <div class="form-group">
@@ -86,12 +79,10 @@
 </div>
 
 {{!-- RECEBE O VALOR INFORMADO NO SELECT A TRIBUI A INPUT PARA REGISTRAR O CODPARC --}}
-<script type="text/javascript">                
-    
-    
+<script type="text/javascript">  
+
     function update() {
-				var select = document.getElementById('list');              
-                             
+				var select = document.getElementById('list'); 
 				var option = select.options[select.selectedIndex];
 
                 //busca valor contrato
@@ -102,61 +93,20 @@
                 
                 document.getElementById('value').value= option.value;
 				document.getElementById('codparc').value = option.id;
-                document.getElementById('codprod').value = option.title;                
-                
-                //document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("previsao"); 
-                //document.getElementById('codosweb').value = event.target.selectedOptions[0].getAttribute("osweb");
+                document.getElementById('codprod').value = option.title; 
 
-                
                 //busca valor dos contatos
                 var select = document.getElementById('list2');                                              
 				var option = select.options[select.selectedIndex];
                 var contatos = option.value
 
-                
-
                 console.log('select contatos')
                 console.log(contatos) 
-                
-                //document.getElementById('atualiza').value = option.id;
-
-                
-                
-                
-
-				//document.getElementById('dtprevisao').value = event.target.selectedOptions[0].getAttribute("previsao"); 
-                //document.getElementById('codosweb').value = event.target.selectedOptions[0].getAttribute("osweb");
-
-                //var a = document.getElementById('value');
-               // var b = document.getElementById('teste');
-
-               // b.value = a.value; 
-
-
-               //aplica select contato
-                //pega o select
-                const languagesSelect = document.getElementById('list2')
-                
-
-                //cria a lista com os valores exemplo de Array
-                //const languagesList = ["16410-rodrigo", "JavaScript", "Python", "16410-GoLang"];
-
 
                 const languagesList = contatos
 
                 console.log('impressao lista contatos languagesList')
-                    console.log(languagesList)
-
-                //funçao para inserir os dados no select - Array
-                //languagesList.forEach((language) => {
-                //  option = new Option(language, language.toLowerCase());
-                //  if(option.text.match(16410)){
-                //   languagesSelect.options[languagesSelect.options.length] = option;
-
-                //  }
-
-                //});
-
+                    console.log(languagesList)              
 
                 
                 //pega o select
@@ -167,11 +117,7 @@
 
                 //le o select e pega somente os valores e adiciona em uma nova lista
                 console.log("porra")
-                for (i = 0; i < select.length; i = i + 1) {
-                //ar value = select.options[i].value;
-                //imprime os valores 
-                //console.log(select.options[i].value);
-                //salva os valores em uma lista
+                for (i = 0; i < select.length; i = i + 1) {               
                 vlroption.push(select.options[i].value)
                 
                 }
@@ -192,10 +138,15 @@
                         var option = new Option(vlroption[k], vlroption[k]);
                                 var select = document.getElementById("aqui");
                                 select.add(option);
+                }
+                }
                 
-                }
-                }
-			}  
-			update();
+			} 
+            function update2(){
+                var select = document.getElementById('aqui'); 
+				var option = select.options[select.selectedIndex];
+                var novo= option.text.substr(0,2)
+                document.getElementById('atualiza').value= novo;
+            }
             
 		</script>

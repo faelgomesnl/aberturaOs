@@ -1,7 +1,7 @@
 /* module.exports = {
     database : {
-        user: 'SA',
-        password: 'M3t0d0ADM@@@',
+        user: 'sa',
+        password: 'SQL.M3t0d0@2021#',
         server: '192.168.4.4', 
         database: 'MGE_PROD',
         pool: {

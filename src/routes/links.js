@@ -98,8 +98,11 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     
     
     const links2 = await pool.query(`SELECT DISTINCT 
-    CONVERT(VARCHAR(30),c.CODCONTATO,103)+'-'+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+'-'
-    + UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as CONTATO
+CONVERT(VARCHAR(30),c.CODCONTATO,103)+' - '+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+' - '
++ UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as CONTATO,
+c.CODCONTATO AS CODCONT,
+UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as NOME
+
     from sankhya.TGFPAR P
     INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
     INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
@@ -110,7 +113,7 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
     AND PD.USOPROD='S'
-    --order by con.NUMCONTRATO, c.CODCONTATO`);
+    order by CONTATO`);
 
     res.render('links/testes', {geral: links.recordset, cont: links2.recordset})
 });
@@ -154,11 +157,12 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
+    const contato = req.body.atualiza; 
     //const dtprevisao = req.body.dtprevisao;
     //const codosweb = req.body.codosweb; 
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),'2021-04-008 15:40','${parceiro}',1,110,110,'${texto}','P','',30101,1000000);
+    ('${numos}','${contrato}',GETDATE(),'2021-04-008 15:40','${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
     ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');
     INSERT INTO sankhya.TSIATA (CODATA,DESCRICAO,ARQUIVO,CONTEUDO,CODUSU,DTALTER,TIPO) VALUES ('${numos}','ANEXO','${filetoupload}','${filetoupload}',1006,GETDATE(),'W')
@@ -277,7 +281,9 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     CONVERT(VARCHAR(30),O.DTFECHAMENTO,103) AS DT_FECHAMENTO,
     CONVERT(VARCHAR(30),I.TERMEXEC,103) AS DT_EXECUCAO,
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
-    CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
+    
+    (CASE  WHEN O.SITUACAO ='P' THEN  '' ELSE I.SOLUCAO END )  AS SOLUCAO,
+    CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAOA,
     U.NOMEUSU AS RESPONSAVEL,
     USU.NOMEUSU AS EXECUTANTE,
     TSIUSU.NOMEUSU AS FECHADA,
@@ -305,7 +311,7 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     LEFT JOIN SANKHYA.TSIUFS UFS ON (CID.UF = UFS.CODUF)
     LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = C.NUSLA)
 
-    WHERE 
+    WHERE
     O.NUFAP IS NULL   
     --AND O.DHCHAMADA >= '10/09/2020'
     AND I.TERMEXEC = (SELECT DISTINCT MAX (TERMEXEC) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS)
