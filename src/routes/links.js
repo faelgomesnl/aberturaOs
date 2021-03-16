@@ -69,33 +69,23 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
     //contrato
     const links = await pool.query(`SELECT DISTINCT L.NUM_CONTRATO, PAR.NOMEPARC,
-    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, CON.CODUSUOS , L.ID_LOGIN
+    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, CON.CODUSUOS , L.ID_LOGIN,
+    replace(rtrim(replace(TC.VALORTEMPO,'0',' ')),' ','0') AS VALORTEMPO
     FROM sankhya.AD_TBACESSO L
     INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
     INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
     INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
     INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
     INNER JOIN sankhya.TGFCTT C ON (PAR.CODPARC=C.CODPARC)
-    WHERE L.ID_LOGIN = ${idlogin}
-    AND CON.ATIVO = 'S'
-    AND PS.SITPROD IN ('A','B')
-    AND PD.USOPROD='S'`); 
 
-    //contato
-    /* const links2 = await pool.query(`SELECT DISTINCT c.CODCONTATO,c.NOMECONTATO, p.CODPARC,
-    con.NUMCONTRATO, L.ID_LOGIN
-    from sankhya.TGFPAR P
-    INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
-    INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
-    inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
-    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
-        INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = CON.NUSLA)
+    LEFT JOIN sankhya.TCSRSL TC ON (SLA.NUSLA=TC.NUSLA)
+
     WHERE L.ID_LOGIN = ${idlogin}
     AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
     AND PD.USOPROD='S'
-    order by con.NUMCONTRATO, c.CODCONTATO`);  */
-    
+    AND TC.PRIORIDADE IS NULL`);     
     
     const links2 = await pool.query(`SELECT DISTINCT 
 CONVERT(VARCHAR(30),c.CODCONTATO,103)+' - '+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+' - '
@@ -158,11 +148,15 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
     const contato = req.body.atualiza; 
+    const slccont = req.body.sla;      
+    console.log('slan')
+    console.log(slccont) 
+    
     //const dtprevisao = req.body.dtprevisao;
     //const codosweb = req.body.codosweb; 
 
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),'2021-04-008 15:40','${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000);
+    ('${numos}','${contrato}',GETDATE(),(SELECT DATEADD(HOUR,${slccont},GETDATE())),'${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
     ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');
     INSERT INTO sankhya.TSIATA (CODATA,DESCRICAO,ARQUIVO,CONTEUDO,CODUSU,DTALTER,TIPO) VALUES ('${numos}','ANEXO','${filetoupload}','${filetoupload}',1006,GETDATE(),'W')
@@ -184,10 +178,9 @@ router.get('/', isLoggedIn,  async (req, res) => {
     O.NUMOS, 
     I.NUMITEM,
     USU.NOMEUSU AS EXECUTANTE,
-    CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
-    CONVERT(VARCHAR(30),O.DTPREVISTA,103) AS PREVISAO,
+    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS ABERTURA,
+    FORMAT(CAST(O.DTPREVISTA AS DATETIME), 'dd/MM/yyyy hh:mm') AS PREVISAO,    
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
-
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
     CID.NOMECID AS CIDADE,
     UFS.UF,
@@ -227,9 +220,9 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     P.NOMEPARC,    
     O.NUMOS, 
     I.NUMITEM,
-    CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
-    CONVERT(VARCHAR(30),O.DTFECHAMENTO,103) AS DT_FECHAMENTO,
-    CONVERT(VARCHAR(30),I.TERMEXEC,103) AS DT_EXECUCAO,
+    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS ABERTURA,
+    FORMAT(CAST(O.DTFECHAMENTO AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_FECHAMENTO,
+    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_EXECUCAO,    
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
     U.NOMEUSU AS RESPONSAVEL,
@@ -277,9 +270,9 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     (CASE O.SITUACAO WHEN 'F' THEN 'Fechada'ELSE 'Aberta' END) AS SITUACAO, 
     I.NUMITEM,
     Replace(convert(char(10),O.DHCHAMADA,103),'/','') AS ABERTURA2,
-    CONVERT(VARCHAR(30),O.DHCHAMADA,103) AS ABERTURA,
-    CONVERT(VARCHAR(30),O.DTFECHAMENTO,103) AS DT_FECHAMENTO,
-    CONVERT(VARCHAR(30),I.TERMEXEC,103) AS DT_EXECUCAO,
+    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS ABERTURA,
+    FORMAT(CAST(O.DTFECHAMENTO AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_FECHAMENTO,
+    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_EXECUCAO,
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
     
     (CASE  WHEN O.SITUACAO ='P' THEN  '' ELSE I.SOLUCAO END )  AS SOLUCAO,

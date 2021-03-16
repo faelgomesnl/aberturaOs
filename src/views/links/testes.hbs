@@ -7,7 +7,7 @@
 
             <div class="card">
                 <div class="card-body">
-                    <form action="/links/teste" method="POST">                    
+                    <form action="/links/teste" method="POST" id="frm_">                    
                         
 
                         <div class="form-group">
@@ -22,10 +22,9 @@
                                 {{#each geral}}                                    
                                     <option value="{{NUM_CONTRATO}}" 
                                             id="{{CODPARC}}" 
-                                            title="{{CODPROD}}" 
-                                            previsao="{{PREVISAO}}"
-                                            osweb="{{CODUSUOS}}">
-                                                {{NUM_CONTRATO}} / {{NOMEPARC}} / {{ DESCRPROD }}
+                                            title="{{CODPROD}}"
+                                            ren="{{VALORTEMPO}}" >
+                                                {{NUM_CONTRATO}} - {{NOMEPARC}} - {{ DESCRPROD }}
                                     </option>                                   
                                     
                                 {{/each}}
@@ -45,7 +44,7 @@
                             </select>
                         </div> 
 
-                        <div class="form-group">
+                        <div class="form-group" id="updiv">
                             <select class="select-css" name="contato" id="aqui" onChange="update2()"> 
                                 <option value="" disabled selected>Escolha Contato Responsável</option>   
                                 
@@ -61,7 +60,8 @@
                         <input hidden id="value">
 		                <input hidden id="codparc" name="codparc">
                         <input hidden id="codprod" name="codprod"> 
-                        <input hidden id="atualiza" name="atualiza">                      
+                        <input hidden id="atualiza" name="atualiza">     
+                        <input hidden id="sla" name="sla">                   
 
                         
                         <div class="form-group">
@@ -95,6 +95,11 @@
 				document.getElementById('codparc').value = option.id;
                 document.getElementById('codprod').value = option.title; 
 
+                //busca o sla referente ao contrato
+                var ren = document.forms['frm_'].elements['list'].options[document.forms['frm_'].elements['list'].selectedIndex].getAttribute('ren');
+                const slacc = parseInt(ren) 
+                document.getElementById('sla').value = slacc
+
                 //busca valor dos contatos
                 var select = document.getElementById('list2');                                              
 				var option = select.options[select.selectedIndex];
@@ -116,7 +121,7 @@
 
 
                 //le o select e pega somente os valores e adiciona em uma nova lista
-                console.log("porra")
+                //console.log("porra")
                 for (i = 0; i < select.length; i = i + 1) {               
                 vlroption.push(select.options[i].value)
                 
@@ -140,7 +145,8 @@
                                 select.add(option);
                 }
                 }
-                
+
+                 
 			} 
             function update2(){
                 var select = document.getElementById('aqui'); 
@@ -148,5 +154,11 @@
                 var novo= option.text.substr(0,2)
                 document.getElementById('atualiza').value= novo;
             }
+
+            
+            
+            
+
+
             
 		</script>
