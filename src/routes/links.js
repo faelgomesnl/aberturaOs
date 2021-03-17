@@ -77,10 +77,8 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
     INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
     INNER JOIN sankhya.TGFCTT C ON (PAR.CODPARC=C.CODPARC)
-
     LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = CON.NUSLA)
     LEFT JOIN sankhya.TCSRSL TC ON (SLA.NUSLA=TC.NUSLA)
-
     WHERE L.ID_LOGIN = ${idlogin}
     AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
@@ -88,17 +86,16 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     AND TC.PRIORIDADE IS NULL`);     
     
     const links2 = await pool.query(`SELECT DISTINCT 
-CONVERT(VARCHAR(30),c.CODCONTATO,103)+' - '+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+' - '
-+ UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as CONTATO,
-c.CODCONTATO AS CODCONT,
-UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as NOME
-
+    CONVERT(VARCHAR(30),c.CODCONTATO,103)+' - '+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+' - '
+    + UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as CONTATO,
+    c.CODCONTATO AS CODCONT,
+    UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as NOME
     from sankhya.TGFPAR P
     INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
     INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
     inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
     INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
-        INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
     WHERE L.ID_LOGIN = ${idlogin}
     AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
@@ -107,35 +104,6 @@ UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as NOME
 
     res.render('links/testes', {geral: links.recordset, cont: links2.recordset})
 });
-
-
-router.get('/teste2/:contrato',  async (req, res) => {
-    //const idlogin = req.user.CODLOGIN  
-    //contato
-    //const contrato = req.body.contrato;  
-    const contrato = parseInt(req.params.contrato)  
-    const links2 = await pool.query(`SELECT DISTINCT c.CODCONTATO,c.NOMECONTATO, p.CODPARC,
-    con.NUMCONTRATO, L.ID_LOGIN
-    from sankhya.TGFPAR P
-    INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
-    INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
-    inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
-    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
-        INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
-    WHERE L.ID_LOGIN = 34
-    AND CON.ATIVO = 'S'
-    AND PS.SITPROD IN ('A','B')
-    AND PD.USOPROD='S'
-    AND con.NUMCONTRATO = ${contrato}
-    order by con.NUMCONTRATO, c.CODCONTATO`);
-    console.log('print contrato') 
-    console.log('print consulta',links2.recordset) 
-    /*  */
-    res.send(links2.recordset)    
-});
-
-
-
 
 router.post('/teste', isLoggedIn,  async (req, res) => {    
 
