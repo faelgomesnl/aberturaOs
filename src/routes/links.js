@@ -1,5 +1,22 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path')
+
+//anexar arquivo
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function(req, file, cb){
+        cb(null,'uploads/')
+    },
+    filename: function(req,file,cb){
+        cb(null, file.originalname + path.extname(file.originalname))
+    }
+})
+
+const upload = multer({storage})
+
+
 
 const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
@@ -105,13 +122,13 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     res.render('links/testes', {geral: links.recordset, cont: links2.recordset})
 });
 
-router.post('/teste', isLoggedIn,  async (req, res) => {    
+router.post('/teste', isLoggedIn, upload.single('file'), async (req, res) => {    
 
     const links = await pool.query('select top (1) NUMOS +1 as NUMOS from sankhya.TCSOSE order by numos desc');  
     const numos = Object.values(links.recordset[0])    
 
     const texto = req.body.texto;
-    const filetoupload= req.body.filetoupload
+    const filetoupload= req.body.file
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
@@ -126,9 +143,7 @@ router.post('/teste', isLoggedIn,  async (req, res) => {
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
     ('${numos}','${contrato}',GETDATE(),(SELECT DATEADD(HOUR,${slccont},GETDATE())),'${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');
-    INSERT INTO sankhya.TSIATA (CODATA,DESCRICAO,ARQUIVO,CONTEUDO,CODUSU,DTALTER,TIPO) VALUES ('${numos}','ANEXO','${filetoupload}','${filetoupload}',1006,GETDATE(),'W')
-`);   
+    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');`);   
     
     console.log(filetoupload)
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
