@@ -10,7 +10,7 @@ const storage = multer.diskStorage({
         cb(null,'uploads/')
     },
     filename: function(req,file,cb){
-        cb(null, file.originalname + path.extname(file.originalname))
+        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
     }
 })
 
@@ -128,7 +128,7 @@ router.post('/teste', isLoggedIn, upload.single('file'), async (req, res) => {
     const numos = Object.values(links.recordset[0])    
 
     const texto = req.body.texto;
-    const filetoupload= req.body.file
+    const filetoupload = upload
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
@@ -143,8 +143,11 @@ router.post('/teste', isLoggedIn, upload.single('file'), async (req, res) => {
     await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
     ('${numos}','${contrato}',GETDATE(),(SELECT DATEADD(HOUR,${slccont},GETDATE())),'${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000);
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');`);   
+    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');
+    INSERT INTO sankhya.TSIATA (CODATA,DESCRICAO,ARQUIVO,CONTEUDO,CODUSU,DTALTER,TIPO) VALUES ('${numos}','ANEXO','${filetoupload}','${filetoupload}',1006,GETDATE(),'W')
+`);   
     
+    console.log('anexo')   
     console.log(filetoupload)
     req.flash('success', 'Ordem De Serviço Criada com Sucesso!!!!')
     res.redirect('/links')
@@ -190,7 +193,7 @@ router.get('/', isLoggedIn,  async (req, res) => {
     O.NUFAP IS NULL
     AND I.TERMEXEC IS NULL
     AND I.NUMITEM = (SELECT MAX(NUMITEM) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS AND TERMEXEC IS NULL)
-    AND O.DHCHAMADA >= '10/09/2020'
+    AND O.DHCHAMADA >= '01/01/2021'
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/list', { lista: links.recordset });
 });
@@ -203,6 +206,7 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     P.NOMEPARC,    
     O.NUMOS, 
     I.NUMITEM,
+    Replace(convert(char(10),O.DHCHAMADA,103),'/','') AS ABERTURA2,
     FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS ABERTURA,
     FORMAT(CAST(O.DTFECHAMENTO AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_FECHAMENTO,
     FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_EXECUCAO,    
@@ -238,7 +242,7 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     O.NUFAP IS NULL
     AND O.SITUACAO = 'F'
     AND I.TERMEXEC = (SELECT DISTINCT MAX (TERMEXEC) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS)
-    AND O.DHCHAMADA >= '10/09/2020'
+    AND O.DHCHAMADA >= '01/01/2021'
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/osclose', { lista: links.recordset });
 });
@@ -287,10 +291,11 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     LEFT JOIN SANKHYA.TSIUFS UFS ON (CID.UF = UFS.CODUF)
     LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = C.NUSLA)
 
-    WHERE
-    O.NUFAP IS NULL   
-    --AND O.DHCHAMADA >= '10/09/2020'
-    AND I.TERMEXEC = (SELECT DISTINCT MAX (TERMEXEC) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS)
+    WHERE 
+    O.NUFAP IS NULL
+    AND O.SITUACAO in ('P','F')
+    AND I.NUMITEM = (SELECT DISTINCT MAX (NUMITEM) FROM SANKHYA.TCSITE WHERE NUMOS = O.NUMOS)
+    AND O.DHCHAMADA >= '01/01/2021'
     AND AC.ID_LOGIN= ${idlogin}`);
     res.render('links/all', { lista: links.recordset });
 });

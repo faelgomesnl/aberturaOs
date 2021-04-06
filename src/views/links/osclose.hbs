@@ -46,7 +46,8 @@
                                 {{!-- <th data-field="defeito" data-editable="true">SLA</th>  --}}
 
                                 <th data-field="abertura">Abertura</th>
-                                <th data-field="fechamento">Fechamento</th>
+                                <th data-field="fechamento" hidden>teste</th>
+                                <th data-field="fechamento" hidden>Fechamento</th>
                                 <th data-field="execucao">Execução</th>                        
                                 <th data-field="defeitos" data-editable="true">Defeitos</th>
                                 <th data-field="solucao" data-editable="true">Solução</th> 
@@ -70,7 +71,8 @@
                             <td>{{NUMITEM}}</td> 
                             {{!--  <td>{{DESCRICAO_SLA}}</td>  --}}
                             <td>{{ABERTURA}}</td>
-                            <td>{{DT_FECHAMENTO}}</td>
+                            <td hidden>{{ABERTURA2}}</td>
+                            <td hidden>{{DT_FECHAMENTO}}</td>
                             <td>{{DT_EXECUCAO}}</td>
                             <td>{{DEFEITO}}</td>
                             <td>{{SOLUCAO}}</td>
@@ -122,6 +124,7 @@
                                 {{!-- <th data-field="defeito" data-editable="true">SLA</th>  --}}
 
                                 <th data-field="abertura">Abertura</th>
+                                <th data-field="fechamento" hidden>teste</th>
                                 <th data-field="fechamento" hidden>Fechamento</th>
                                 <th data-field="execucao">Execução</th>                        
                                 <th data-field="defeitos" data-editable="true">Solicitação</th>
@@ -146,6 +149,7 @@
                             <td>{{NUMITEM}}</td> 
                             {{!--  <td>{{DESCRICAO_SLA}}</td>  --}}
                             <td>{{ABERTURA}}</td>
+                            <td hidden>{{ABERTURA2}}</td>
                             <td hidden>{{DT_FECHAMENTO}}</td>
                             <td>{{DT_EXECUCAO}}</td>
                             <td>{{DEFEITO}}</td>
@@ -392,7 +396,7 @@
     function( settings, data, dataIndex ) {
         var min = parseInt( $('#min').val(), 10 );
         var max = parseInt( $('#max').val(), 10 );
-        var age = parseFloat( data[6] ) || 0; // use data for the age column
+        var age = parseFloat( data[5] ) || 0; // use data for the age column
  
         if ( ( isNaN( min ) && isNaN( max ) ) ||
              ( isNaN( min ) && age <= max ) ||
