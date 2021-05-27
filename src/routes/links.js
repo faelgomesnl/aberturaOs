@@ -5,16 +5,18 @@ const path = require('path')
 //anexar arquivo
 const multer = require('multer');
 
-const storage = multer.diskStorage({
-    destination: function(req, file, cb){
-        cb(null,'uploads/')
-    },
-    filename: function(req,file,cb){
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-})
+const DIR = './uploads';
 
-const upload = multer({storage})
+const storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+      callback(null, DIR);
+    },
+    filename: function (req, file, cb) {
+      cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+ 
+const upload = multer({storage: storage});
 
 
 
@@ -22,7 +24,6 @@ const pool = require('../database');
 const { isLoggedIn } = require('../lib/auth');
 
 router.get('/add', isLoggedIn, (req, res) => {    
-    res.render('links/add')
 });
 
 //ADICIONAR NOVO USUARIO, SOMENTE ADMIN
@@ -46,29 +47,10 @@ router.get('/newcont', isLoggedIn, async (req, res) => {
     const links = await pool.query(`SELECT CODLOGIN,fullname,NOMEUSU,ADMINISTRADOR
     FROM sankhya.AD_TBLOGIN 
     ORDER BY NOMEUSU `); 
-    
-    /* const links2 = await pool.query(`SELECT CON.NUMCONTRATO, CON.CODPARC, PAR.NOMEPARC
-    FROM sankhya.TCSCON CON
-    INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
-    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
-    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
-    WHERE CON.ATIVO = 'S'
-    AND PS.SITPROD IN ('A','B')
-    AND PD.USOPROD='S'  `);  
-    res.render('links/newcont',{lista: links.recordset, lista2: links2.recordset })*/
    
     res.render('links/newcont',{lista: links.recordset})
 });
 
-/* router.get('/newcont', isLoggedIn, async (req, res) => {  
-    
-    const links2 = await pool.query(`SELECT NUM_CONTRATO
-    FROM sankhya.AD_TBACESSO
-    WHERE ID_LOGIN = 8 `);     
-   
-    console.log('este é link 2',links2)
-    res.render('links/newcont',{lista2: links2.recordset})
-}); */
 
 router.post('/newcont', isLoggedIn, async (req, res) => {  
 
@@ -84,10 +66,123 @@ router.post('/newcont', isLoggedIn, async (req, res) => {
 //ADD OS
 router.get('/teste', isLoggedIn, async (req, res) => {
     const idlogin = req.user.CODLOGIN  
+
     //contrato
     const links = await pool.query(`SELECT DISTINCT L.NUM_CONTRATO, PAR.NOMEPARC,
-    PAR.CODPARC, PD.DESCRPROD, PS.CODPROD, CON.CODUSUOS , L.ID_LOGIN,
-    replace(rtrim(replace(TC.VALORTEMPO,'0',' ')),' ','0') AS VALORTEMPO
+    CASE
+         WHEN CON.AD_CODOCOROS IS NULL THEN 900
+         ELSE CON.AD_CODOCOROS
+       END AS CARTEIRA,
+    PAR.CODPARC, PD.DESCRPROD, 
+    PS.CODPROD, CON.CODUSUOS , L.ID_LOGIN,
+CASE  WHEN (DATEPART(DW,GETDATE() )) = 7   
+     THEN
+            CASE 
+            WHEN CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END < (ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0)) 
+            --add apenas 360
+            THEN DATEDIFF(MI, GETDATE(), DATEADD(MI, (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ), 
+            DATEADD(DD, 2, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))))
+			
+
+            WHEN (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ) >= 0 and (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ) <=600
+            THEN DATEDIFF(MI, GETDATE(), DATEADD(MI, (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ), 
+            DATEADD(DD, 3, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))))
+			
+        
+            ELSE DATEDIFF(MI, GETDATE(), DATEADD(MI, ((CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) )-600), DATEADD(DD, 4, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))) )
+			
+            END 
+
+    WHEN (DATEPART(DW,GETDATE() )) = 1
+    THEN
+            CASE WHEN CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END < (ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0)) 
+            --add apenas 360
+            THEN DATEDIFF(MI, GETDATE(), DATEADD(MI, (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ), 
+            DATEADD(DD, 1, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111)))
+)
+			
+            WHEN (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ) >= 0 and (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ) <=600
+            THEN DATEDIFF(MI, GETDATE(), DATEADD(MI, (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ), 
+            DATEADD(DD, 2, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))))
+			
+        
+            ELSE DATEDIFF(MI, GETDATE(), DATEADD(MI, ((CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) )-600), DATEADD(DD, 3, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))))
+			
+            END
+
+    ELSE
+
+        CASE WHEN CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END < (ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0)) 
+            --add apenas 360
+            THEN DATEDIFF(MI, GETDATE(), DATEADD(MI, CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END, GETDATE()))
+			
+
+            WHEN (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ) >= 0 and (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ) <=600
+            THEN DATEDIFF(MI, GETDATE(), DATEADD(MI, (CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) ), 
+            DATEADD(DD, 1, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))))
+			
+        
+            ELSE DATEDIFF(MI, GETDATE(), DATEADD(MI, ((CASE WHEN RIGHT(TC.VALORTEMPO, 2) = '00'
+            THEN DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '00', ':00')) 
+            ELSE DATEDIFF(MI, 0, REPLACE(TC.VALORTEMPO, '30', ':30')) 
+            END - ISNULL(DATEDIFF(MI,GETDATE(),convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','18:00'),111)),0) )-600), DATEADD(DD, 2, convert(datetime,Concat(CONVERT(VARCHAR(10), CAST(getdate() AS DATETIME), 111),' ','08:00'),111))))
+			
+            END
+   
+END AS VALORTEMPO,
+    CD.NOMECID AS CIDADE,
+    (CONVERT(VARCHAR(45),EN.NOMEEND,103)) as LOGRADOURO
     FROM sankhya.AD_TBACESSO L
     INNER JOIN sankhya.TCSCON CON ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
     INNER JOIN sankhya.TGFPAR PAR ON (PAR.CODPARC = CON.CODPARC) 
@@ -96,12 +191,18 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     INNER JOIN sankhya.TGFCTT C ON (PAR.CODPARC=C.CODPARC)
     LEFT JOIN sankhya.TCSSLA SLA ON (SLA.NUSLA = CON.NUSLA)
     LEFT JOIN sankhya.TCSRSL TC ON (SLA.NUSLA=TC.NUSLA)
+    LEFT JOIN sankhya.TSIBAI BR ON (PAR.CODBAI=BR.CODBAI)
+    LEFT JOIN sankhya.TSICID CD ON (CD.CODCID=PAR.CODCID)
+    LEFT JOIN sankhya.TSIEND EN ON (EN.CODEND=PAR.CODEND)
+    LEFT JOIN sankhya.TSIUFS UF ON (UF.UF=CD.UF)
+    LEFT JOIN sankhya.TFPLGR LG ON (LG.CODLOGRADOURO=EN.CODLOGRADOURO)
     WHERE L.ID_LOGIN = ${idlogin}
     AND CON.ATIVO = 'S'
     AND PS.SITPROD IN ('A','B')
     AND PD.USOPROD='S'
-    AND TC.PRIORIDADE IS NULL`);     
+    AND TC.PRIORIDADE =1`);     
     
+    //contatos
     const links2 = await pool.query(`SELECT DISTINCT 
     CONVERT(VARCHAR(30),c.CODCONTATO,103)+' - '+CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+' - '
     + UPPER  (CONVERT(VARCHAR(30),c.NOMECONTATO,103)) as CONTATO,
@@ -119,7 +220,25 @@ router.get('/teste', isLoggedIn, async (req, res) => {
     AND PD.USOPROD='S'
     order by CONTATO`);
 
-    res.render('links/testes', {geral: links.recordset, cont: links2.recordset})
+    //produtos
+    const links3 = await pool.query(`SELECT DISTINCT 
+    CONVERT(VARCHAR(30),con.NUMCONTRATO,103)+' - '+CONVERT(VARCHAR(30),PS.CODPROD,103)+' - '
+    + UPPER  (CONVERT(VARCHAR(50),PD.DESCRPROD,120)) as PRODUTO,
+    con.NUMCONTRATO,
+     PD.DESCRPROD, 
+     PS.CODPROD
+    from sankhya.TGFPAR P
+    INNER JOIN sankhya.TGFCTT C ON (P.CODPARC=C.CODPARC)
+    INNER JOIN sankhya.TCSCON CON ON (P.CODPARC = CON.CODPARC)
+    inner join sankhya.AD_TBACESSO L ON (L.NUM_CONTRATO = CON.NUMCONTRATO)
+    INNER JOIN sankhya.TCSPSC PS ON (CON.NUMCONTRATO=PS.NUMCONTRATO)
+    INNER JOIN sankhya.TGFPRO PD ON (PD.CODPROD=PS.CODPROD)
+    WHERE L.ID_LOGIN = ${idlogin}
+    AND PS.SITPROD IN ('A','B')
+    AND PD.USOPROD='S'
+    order by con.NUMCONTRATO, PS.CODPROD`);
+
+    res.render('links/testes', {geral: links.recordset, cont: links2.recordset, prod: links3.recordset})
 });
 
 router.post('/teste', isLoggedIn, upload.single('file'), async (req, res) => {    
@@ -128,22 +247,18 @@ router.post('/teste', isLoggedIn, upload.single('file'), async (req, res) => {
     const numos = Object.values(links.recordset[0])    
 
     const texto = req.body.texto;
-    const filetoupload = upload
+    const filetoupload = req.file.filename
     const contrato = req.body.contrato; 
     const parceiro = req.body.codparc;
     const produto = req.body.codprod; 
     const contato = req.body.atualiza; 
-    const slccont = req.body.sla;      
-    console.log('slan')
-    console.log(slccont) 
-    
-    //const dtprevisao = req.body.dtprevisao;
-    //const codosweb = req.body.codosweb; 
+    const slccont = req.body.sla;
+    const cart = req.body.carteira;
 
-    await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT) VALUES 
-    ('${numos}','${contrato}',GETDATE(),(SELECT DATEADD(HOUR,${slccont},GETDATE())),'${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000);
+    await pool.query(`INSERT INTO sankhya.TCSOSE (NUMOS,NUMCONTRATO,DHCHAMADA,DTPREVISTA,CODPARC,CODCONTATO,CODATEND,CODUSURESP,DESCRICAO,SITUACAO,CODCOS,CODCENCUS,CODOAT,POSSUISLA) VALUES 
+    ('${numos}','${contrato}',GETDATE(),(SELECT DATEADD(MI,${slccont},GETDATE())),'${parceiro}','${contato}',110,110,'${texto}','P','',30101,1000000,'S');
     INSERT INTO SANKHYA.TCSITE (NUMOS,NUMITEM,CODSERV,CODPROD,CODUSU,CODOCOROS,CODUSUREM,DHENTRADA,DHPREVISTA,CODSIT,COBRAR,RETRABALHO) VALUES 
-    ('${numos}',1,4381,'${produto}',104,900,569,GETDATE(),'2021-04-008 15:40',15,'N','N');
+    ('${numos}',1,4381,'${produto}',104,'${cart}',569,GETDATE(),(SELECT DATEADD(MI,${slccont},GETDATE())),15,'N','N');
     INSERT INTO sankhya.TSIATA (CODATA,DESCRICAO,ARQUIVO,CONTEUDO,CODUSU,DTALTER,TIPO) VALUES ('${numos}','ANEXO','${filetoupload}','${filetoupload}',1006,GETDATE(),'W')
 `);   
     
@@ -206,10 +321,10 @@ router.get('/osclose', isLoggedIn,  async (req, res) => {
     P.NOMEPARC,    
     O.NUMOS, 
     I.NUMITEM,
-    Replace(convert(char(10),O.DHCHAMADA,103),'/','') AS ABERTURA2,
-    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS ABERTURA,
-    FORMAT(CAST(O.DTFECHAMENTO AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_FECHAMENTO,
-    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_EXECUCAO,    
+    CONVERT(VARCHAR(10), O.DHCHAMADA, 120)  AS ABERTURA2,
+    CONVERT(VARCHAR(30),O.DHCHAMADA,103)+' '+ CONVERT(VARCHAR(30),O.DHCHAMADA,108) AS ABERTURA,
+    CONVERT(VARCHAR(30),O.DTFECHAMENTO,103)+' '+ CONVERT(VARCHAR(30),O.DTFECHAMENTO,108) AS DT_FECHAMENTO,
+    CONVERT(VARCHAR(30),I.TERMEXEC,103)+' '+ CONVERT(VARCHAR(30),I.TERMEXEC,108) AS DT_EXECUCAO,  
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
     CONVERT(NVARCHAR(MAX),I.SOLUCAO) AS SOLUCAO,
     U.NOMEUSU AS RESPONSAVEL,
@@ -256,10 +371,10 @@ router.get('/all', isLoggedIn,  async (req, res) => {
     O.NUMOS,
     (CASE O.SITUACAO WHEN 'F' THEN 'Fechada'ELSE 'Aberta' END) AS SITUACAO, 
     I.NUMITEM,
-    Replace(convert(char(10),O.DHCHAMADA,103),'/','') AS ABERTURA2,
-    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS ABERTURA,
-    FORMAT(CAST(O.DTFECHAMENTO AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_FECHAMENTO,
-    FORMAT(CAST(O.DHCHAMADA AS DATETIME), 'dd/MM/yyyy hh:mm') AS DT_EXECUCAO,
+    CONVERT(VARCHAR(10), O.DHCHAMADA, 120)  AS ABERTURA2,
+    CONVERT(VARCHAR(30),O.DHCHAMADA,103)+' '+ CONVERT(VARCHAR(30),O.DHCHAMADA,108) AS ABERTURA,
+    CONVERT(VARCHAR(30),O.DTFECHAMENTO,103)+' '+ CONVERT(VARCHAR(30),O.DTFECHAMENTO,108) AS DT_FECHAMENTO,
+    CONVERT(VARCHAR(30),I.TERMEXEC,103)+' '+ CONVERT(VARCHAR(30),I.TERMEXEC,108) AS DT_EXECUCAO,  
     CONVERT(NVARCHAR(MAX),O.DESCRICAO)AS DEFEITO,
     
     (CASE  WHEN O.SITUACAO ='P' THEN  '' ELSE I.SOLUCAO END )  AS SOLUCAO,

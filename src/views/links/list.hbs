@@ -30,19 +30,13 @@
                             <th data-field="item" data-editable="true">Item</th>
                             <th data-field="executante" data-editable="true">Executante</th> 
                             <th data-field="abertura">Abertura</th>
-                            {{!-- <th data-field="previsao" data-editable="true">Previsão</th>  
-                            <th data-field="defeito" data-editable="true">SLA</th>  --}}
-
-                            <th data-field="defeito" data-editable="true">Defeito</th> 
-
-                            <th data-field="defeito" data-editable="true">Status</th>
-                            
+                            <th data-field="defeito" data-editable="true">Descrição</th> 
+                            <th data-field="defeito" data-editable="true">Status</th>                            
                             <th data-field="defeito" data-editable="true">Cidade</th>  
                             <th data-field="defeito" data-editable="true">UF</th>                      
                             <th data-field="defeito" data-editable="true">Motivo</th>  
                             <th data-field="defeito" data-editable="true">Solicitante</th>  
-                            <th data-field="defeito" data-editable="true">Tipo</th>      
-                                        
+                            <th data-field="defeito" data-editable="true">Tipo</th>  
                         </tr>
                         </thead>
 
@@ -56,14 +50,10 @@
                             <td>{{NUMITEM}}</td> 
                             <td>{{EXECUTANTE}}</td>
                             <td>{{ABERTURA}}</td>
-                            {{!--  <td>{{PREVISAO}}</td> 
-                            <td>{{DESCRICAO_SLA}}</td>  --}}
                             <td>{{DEFEITO}}</td>
-
                             <td>{{DESCRICAO}}</td> 
                             <td>{{CIDADE}}</td> 
-                            <td>{{UF}}</td> 
-                            
+                            <td>{{UF}}</td>                             
                             <td>{{MOTIVO}}</td> 
                             <td>{{SOLICITANTE}}</td> 
                             <td>{{TIPO}}</td>                        
@@ -96,14 +86,8 @@
                             <th data-field="item" data-editable="true">Item</th>
                             <th data-field="executante" data-editable="true">Executante</th> 
                             <th data-field="abertura">Abertura</th>
-                            {{!-- <th data-field="previsao" data-editable="true">Previsão</th>  
-                            <th data-field="defeito" data-editable="true">SLA</th>  --}}
-
                             <th data-field="defeito" data-editable="true">Solicitação</th> 
-
-                             <th data-field="defeito" data-editable="true">Status</th>                         
-                             
-                                        
+                             <th data-field="defeito" data-editable="true">Status</th>   
                         </tr>
                         </thead>
                         <tbody>
@@ -115,13 +99,8 @@
                             <td>{{NUMITEM}}</td> 
                             <td>{{EXECUTANTE}}</td>
                             <td>{{ABERTURA}}</td>
-                            {{!--  <td>{{PREVISAO}}</td> 
-                            <td>{{DESCRICAO_SLA}}</td>  --}}
                             <td>{{DEFEITO}}</td>
-
                             <td>{{DESCRICAO}}</td> 
-                                                
-                            
                             </tr>
                         {{/each}}
                         </tbody>

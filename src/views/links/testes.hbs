@@ -11,20 +11,24 @@
                         
 
                         <div class="form-group">
-                            <textarea type="text" name="texto" class="form-control" placeholder="Informe o defeito e os respectivos contatos"></textarea>
+                            <textarea type="text" name="texto" class="form-control" placeholder="Informe a descrição e os respectivos contatos"></textarea>
                         </div>                      
 
                         <div class="form-group">
-                            <select class="select-css" name="contrato" id="list" onChange="update()">
-                                <option selected disabled>Contrato/ Parceiro/ Produto </option>  
-                                <option selected disabled>Escolha Um Contrato </option>
+                            <select class="select-css" name="contrato" id="list" onChange="update()" >
+                                <option selected disabled>Contrato/ Parceiro </option>  
+                                <option selected disabled>Escolha Uma Localidade </option>
                                 
                                 {{#each geral}}                                    
                                     <option value="{{NUM_CONTRATO}}" 
                                             id="{{CODPARC}}" 
                                             title="{{CODPROD}}"
-                                            ren="{{VALORTEMPO}}" >
-                                                {{NUM_CONTRATO}} - {{NOMEPARC}} - {{ DESCRPROD }}
+                                            ren="{{VALORTEMPO}}" 
+                                            ren2="{{CIDADE}}"
+                                            ren3="{{LOGRADOURO}}"
+                                            ren4="{{NOMEPARC}}"
+                                            ren5="{{CARTEIRA}}">
+                                                {{NOMEPARC}}
                                     </option>                                   
                                     
                                 {{/each}}
@@ -32,7 +36,7 @@
                         </div>
 
                         <div class="form-group" hidden>
-                            <select class="select-css" name="contato" id="list2" onChange="update()">    
+                            <select class="select-css" name="contato" id="list2" onChange="update()" >    
                                 
                                 {{#each cont}}                                    
                                     <option value="{{CONTATO}}"
@@ -44,24 +48,51 @@
                             </select>
                         </div> 
 
+                         <div class="form-group" hidden>
+                            <select class="select-css" name="produto" id="list3" onChange="update()">    
+                                
+                                {{#each prod}}                                    
+                                    <option value="{{PRODUTO}}"
+                                    id="{{PRODUTO}}" >
+                                                {{PRODUTO}}
+                                    </option>                                   
+                                    
+                                {{/each}}
+                            </select>
+                        </div> 
+
                         <div class="form-group" id="updiv">
-                            <select class="select-css" name="contato" id="aqui" onChange="update2()"> 
+                            <select class="select-css" name="contato" id="aqui2" onChange="update2()" required> 
+                                <option value="" disabled selected>Escolha Um Produto</option>   
+                                
+                            </select>
+                        </div>  
+
+                        <div class="form-group" id="updiv">
+                            <select class="select-css" name="contato" id="aqui" onChange="update2()" required> 
                                 <option value="" disabled selected>Escolha Contato Responsável</option>   
                                 
                             </select>
-                        </div> 
-                        
+                        </div>                         
 
                         <div class="form-group">
-                            <input type="file" name="file"><br> 
+                            <input type="file" name="file"><br>
                         </div>
 
                         {{!-- armazena valores envio req.body insert  --}}
-                        <input hidden id="value">
-		                <input hidden id="codparc" name="codparc">
-                        <input hidden id="codprod" name="codprod"> 
-                        <input hidden id="atualiza" name="atualiza">     
-                        <input hidden id="sla" name="sla">                   
+                        <div class="form-group">
+                            <input hidden id="value">
+                            <input hidden id="codparc" name="codparc">
+                            <input hidden id="codprod" name="codprod"> 
+                            <input hidden id="atualiza" name="atualiza">     
+                            <input hidden id="sla" name="sla"> 
+                            <input hidden id="carteira" name="carteira">     
+
+                            {{!-- exibição enderaço --}} 
+                                <input type="text" id="cidade" name="cidade" disabled="disabled" style='width:100%'>  
+                                <input type="text" id="logradouro" name="logradouro" disabled="disabled" style='width:100%'>  
+                                <input type="text" id="parceiro" name="parceiro" disabled="disabled" style='width:100%'>
+                        </div>                 
 
                         
                         <div class="form-group">
@@ -95,10 +126,23 @@
 				document.getElementById('codparc').value = option.id;
                 document.getElementById('codprod').value = option.title; 
 
-                //busca o sla referente ao contrato
+                //busca o sla/ carteira referente ao contrato
+
                 var ren = document.forms['frm_'].elements['list'].options[document.forms['frm_'].elements['list'].selectedIndex].getAttribute('ren');
-                const slacc = parseInt(ren) 
-                document.getElementById('sla').value = slacc
+                var ren5 = document.forms['frm_'].elements['list'].options[document.forms['frm_'].elements['list'].selectedIndex].getAttribute('ren5');
+
+                document.getElementById('sla').value = ren
+                document.getElementById('carteira').value = ren5
+                
+                 //lista endereço da localidade escolhida
+                 var ren2 = document.forms['frm_'].elements['list'].options[document.forms['frm_'].elements['list'].selectedIndex].getAttribute('ren2');
+                var ren3 = document.forms['frm_'].elements['list'].options[document.forms['frm_'].elements['list'].selectedIndex].getAttribute('ren3');
+                var ren4 = document.forms['frm_'].elements['list'].options[document.forms['frm_'].elements['list'].selectedIndex].getAttribute('ren4');
+
+                document.getElementById('cidade').value = ren2
+                document.getElementById('logradouro').value = ren3
+                document.getElementById('parceiro').value = ren4
+
 
                 //busca valor dos contatos
                 var select = document.getElementById('list2');                                              
@@ -111,26 +155,24 @@
                 const languagesList = contatos
 
                 console.log('impressao lista contatos languagesList')
-                    console.log(languagesList)              
-
+                    console.log(languagesList) 
                 
-                //pega o select
+                //pega o select referente ao contato
                 var select = document.getElementById("list2");
+
                 //cria uma lista vazia 
                 var vlroption = []
 
-
-                //le o select e pega somente os valores e adiciona em uma nova lista
-                //console.log("porra")
+                //le o select e pega somente os valores e adiciona em uma nova lista                
                 for (i = 0; i < select.length; i = i + 1) {               
-                vlroption.push(select.options[i].value)
-                
+                vlroption.push(select.options[i].value)                
                 }
 
-                //Limpa a Lista original
-                for (j = 0; j < select.length; j = j + 1) {
-                    select.options.remove(j);
-                }
+                // altera o contato a medida que muda localidade.
+                var sel = document.getElementById('aqui');
+                for (i = sel.length - 1; i >= 0; i--) {
+                    sel.options.remove(i);
+                }   
 
                 //le os dados que foram armazenados e insere na lista
                 console.log("Lista Preenchida")
@@ -146,19 +188,41 @@
                 }
                 }
 
-                 
+                //pega o select referente ao produto
+                var select = document.getElementById("list3");
+                //cria uma lista vazia 
+                var vlroption = []
+
+                //le o select e pega somente os valores e adiciona em uma nova lista
+                for (i = 0; i < select.length; i = i + 1) {               
+                vlroption.push(select.options[i].value)                
+                }
+
+                // altera o contato a medida que muda produto.
+                var sel = document.getElementById('aqui2');
+                for (i = sel.length - 1; i >= 0; i--) {
+                    sel.options.remove(i);
+                }  
+
+                //le os dados que foram armazenados e insere na lista
+                console.log("Lista Preenchida")
+                for (k =0; k < vlroption.length; k = k + 1){
+                            if(vlroption[k].match(contr)){
+                            console.log(vlroption[k])
+                            
+                        //insere os itens no select option
+                        var option = new Option(vlroption[k], vlroption[k]);
+                                var select = document.getElementById("aqui2");
+                                select.add(option);
+                }
+                }                 
 			} 
+            //insere o código do contrato no respectivo input
             function update2(){
                 var select = document.getElementById('aqui'); 
 				var option = select.options[select.selectedIndex];
                 var novo= option.text.substr(0,2)
                 document.getElementById('atualiza').value= novo;
             }
-
-            
-            
-            
-
-
             
 		</script>
